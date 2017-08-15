@@ -1,0 +1,15 @@
+{
+  "name": "demo-vm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.4",
+    "yargs": "^8.0.2"
+  }
+}
