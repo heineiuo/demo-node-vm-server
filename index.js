@@ -50,13 +50,14 @@ const createMockRequire = ({whiteList}) => (moduleName) => {
 
 const createMockGlobal = ({dirname, requireWhiteList}) => {
   const server = new EventEmitter()
+  server.isStarted = false
   server.sendToSelf = (msg, callback) => {
     server.handler(msg, callback)
   }
   const mockGlobal = {
     createServer: (handler) => {
       console.log('createServer.....')
-      server.emit('create')
+      server.isStarted = true
       server.handler = handler
       return server
     },
@@ -84,6 +85,10 @@ const createMockGlobal = ({dirname, requireWhiteList}) => {
   }
 }
 
+const createVM = (text, options) => {
+
+}
+
 const scriptText = fs.readFileSync(path.resolve('./script.js'), 'utf8')
 const script = new vm.Script(scriptText)
 const { mockGlobal, server } = createMockGlobal({
@@ -91,18 +96,12 @@ const { mockGlobal, server } = createMockGlobal({
   requireWhiteList: ['fs', 'http']
 })
 
-
-let isCreated = false
-
-server.on('create', () => {
-  isCreated = true
-  console.log('child server created')
-})
+script.runInContext(vm.createContext(mockGlobal))
 
 const app = express()
 
 app.use((req, res) => {
-  if (!isCreated) {
+  if (!server.isStarted) {
     res.write('server not ready')
     return res.end()
   }
@@ -115,4 +114,3 @@ app.use((req, res) => {
 
 app.listen(8080, () => console.log('listening onport 8080'))
 
-script.runInContext(vm.createContext(mockGlobal))
